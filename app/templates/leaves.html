@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Leaves</h2>
+  <form class="d-flex" method="get">
+    <select class="form-select me-2" name="status">
+      <option value="" {% if not status %}selected{% endif %}>All</option>
+      <option value="PENDING" {% if status=='PENDING' %}selected{% endif %}>Pending</option>
+      <option value="APPROVED" {% if status=='APPROVED' %}selected{% endif %}>Approved</option>
+      <option value="REJECTED" {% if status=='REJECTED' %}selected{% endif %}>Rejected</option>
+    </select>
+    <button class="btn btn-outline-secondary">Filter</button>
+  </form>
+</div>
+<div class="row">
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Apply Leave</h5>
+        <form method="post" action="/leaves">
+          <div class="mb-2">
+            <label class="form-label">Employee</label>
+            <select class="form-select" name="employee_id">
+              {% for e in employees %}<option value="{{ e.id }}">{{ e.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="mb-2"><label class="form-label">Start Date</label><input class="form-control" type="date" name="start_date" required></div>
+          <div class="mb-2"><label class="form-label">End Date</label><input class="form-control" type="date" name="end_date" required></div>
+          <div class="mb-2">
+            <label class="form-label">Type</label>
+            <select class="form-select" name="leave_type">
+              <option>ANNUAL</option><option>SICK</option><option>UNPAID</option><option>OTHER</option>
+            </select>
+          </div>
+          <div class="mb-3"><label class="form-label">Reason</label><textarea class="form-control" name="reason"></textarea></div>
+          <button class="btn btn-primary">Apply</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Requests</h5>
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered">
+            <thead><tr><th>ID</th><th>Employee</th><th>Dates</th><th>Days</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for l in leaves %}
+              <tr>
+                <td>{{ l.id }}</td>
+                <td>{{ l.employee_name }}</td>
+                <td>{{ l.start_date }} → {{ l.end_date }}</td>
+                <td>{{ l.days }}</td>
+                <td>{{ l.leave_type }}</td>
+                <td><span class="badge bg-secondary">{{ l.status }}</span></td>
+                <td>
+                  {% if l.status == 'PENDING' %}
+                  <form class="d-inline" method="post" action="/leaves/{{ l.id }}/approve">
+                    <button class="btn btn-sm btn-success">Approve</button>
+                  </form>
+                  <form class="d-inline" method="post" action="/leaves/{{ l.id }}/reject">
+                    <button class="btn btn-sm btn-danger">Reject</button>
+                  </form>
+                  {% else %}-{% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
